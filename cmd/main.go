@@ -1,10 +1,11 @@
 package main
 
 import (
-	"assignment-2/utils"
 	"log"
 	"net/http"
 	"time"
+
+	"assignment-2/utils"
 )
 
 var startTime time.Time
