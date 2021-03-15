@@ -48,7 +48,7 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Error: %v", err)
 			return
 		}
-		var information structs.CovidApiResponse
+		var information structs.CovidAPIResponse
 		if err = json.Unmarshal([]byte(string(body)), &information); err != nil {
 			// Handles json parsing error
 			log.Printf("Error: %v", err)
