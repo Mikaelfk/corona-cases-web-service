@@ -1,9 +1,11 @@
 package structs
 
+// CovidApiResponse is for storing the information from the response
 type CovidApiResponse struct {
 	All EntireCountryInformation
 }
 
+// EntireCountryInformation stores all information about a certain country
 type EntireCountryInformation struct {
 	Confirmed  int
 	Recovered  int
@@ -12,6 +14,7 @@ type EntireCountryInformation struct {
 	Population int
 }
 
+// ReturnConfirmedCases is used for returning a json response
 type ReturnConfirmedCases struct {
 	Country              string  `json:"country"`
 	Continent            string  `json:"continent"`

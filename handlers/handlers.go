@@ -28,7 +28,7 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 		splitdate := strings.Split(date, "-")
 		if len(splitdate) < 6 {
 			// Handles string error
-			err := errors.New("Error in date query")
+			err := errors.New("Error in date")
 			log.Printf("Error, %v", err)
 			http.Error(w, "Error: "+err.Error(), http.StatusBadRequest)
 			return
