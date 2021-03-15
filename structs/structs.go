@@ -1,7 +1,7 @@
 package structs
 
-// CovidApiResponse is for storing the information from the response
-type CovidApiResponse struct {
+// CovidAPIResponse is for storing the information from the response
+type CovidAPIResponse struct {
 	All EntireCountryInformation
 }
 
