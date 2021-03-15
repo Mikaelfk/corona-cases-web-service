@@ -3,8 +3,10 @@ package utils
 import (
 	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 // GetPort gets a port from the environmental variable PORT, if this is empty, set port to 8181
@@ -41,4 +43,14 @@ func GetBody(request string, w http.ResponseWriter) ([]byte, error) {
 		return nil, err
 	}
 	return body, nil
+}
+
+// ValidDate checks if a date is valid
+func ValidDate(date string) bool {
+	_, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		log.Printf("Error: %v", err)
+		return false
+	}
+	return true
 }
