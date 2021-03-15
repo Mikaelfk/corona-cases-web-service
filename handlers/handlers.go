@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
+	"assignment-2/structs"
 	"assignment-2/utils"
 
 	"github.com/gorilla/mux"
@@ -20,9 +21,6 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 	log.Println("Reached country endpoint")
 	vars := mux.Vars(r)
 	countryName := vars["country_name"]
-	// Makes sure that the first letter of the country name is capitalized
-	countryName = strings.Title(strings.ToLower(countryName))
-	fmt.Fprintln(w, countryName)
 	val, ok := vars["begin_date-end_date"]
 	if ok {
 		fmt.Fprintln(w, val)
@@ -33,7 +31,26 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Error: %v", err)
 			return
 		}
-		fmt.Fprintln(w, string(body))
+		var information structs.CovidApiResponse
+		if err = json.Unmarshal([]byte(string(body)), &information); err != nil {
+			// Handles json parsing error
+			log.Printf("Error: %v", err)
+			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		var returnJSON structs.ReturnConfirmedCases
+		returnJSON.Confirmed = information.All.Confirmed
+		returnJSON.Recovered = information.All.Recovered
+		returnJSON.Continent = information.All.Continent
+		returnJSON.Country = information.All.Country
+		returnJSON.Scope = "total"
+		returnJSON.PopulationPercentage = float32(returnJSON.Confirmed) / float32(information.All.Population) * 100
+		b, err := json.Marshal(returnJSON)
+		if err != nil {
+			log.Printf("Error: %v", err)
+			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
+		}
+		fmt.Fprintf(w, string(b))
 	}
 
 }
