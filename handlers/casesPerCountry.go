@@ -19,7 +19,7 @@ const dataAPI = "https://covidtrackerapi.bsg.ox.ac.uk/api/v2"
 // CasesPerCountry gets amount of cases for a country
 func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	log.Println("Reached country endpoint")
+	fmt.Println("Reached country endpoint")
 	vars := mux.Vars(r)
 	countryName := vars["country_name"]
 	date, ok := vars["begin_date-end_date"]

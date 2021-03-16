@@ -15,7 +15,7 @@ type EntireCountryInformation struct {
 	Dates      map[string]int
 }
 
-// ReturnConfirmedCases is used for returning a json response
+// ReturnConfirmedCases is used for returning a JSON response
 type ReturnConfirmedCases struct {
 	Country              string  `json:"country"`
 	Continent            string  `json:"continent"`
@@ -23,4 +23,13 @@ type ReturnConfirmedCases struct {
 	Confirmed            int     `json:"confirmed"`
 	Recovered            int     `json:"recovered"`
 	PopulationPercentage float32 `json:"population_percentage"`
+}
+
+// ReturnDiag is used for returning a JSON response for the diag endpoint
+type ReturnDiag struct {
+	MMediaGroupApi  string `json:"mmediagroupapi"`
+	CovidTrackerAPI string `json:"covidtrackerapi"`
+	Registered      int    `json:"registered"`
+	Version         string `json:"version"`
+	Uptime          int    `json:"uptime"`
 }

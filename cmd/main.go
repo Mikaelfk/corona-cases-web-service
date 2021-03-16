@@ -12,12 +12,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var startTime time.Time
-
-const version = "/corona/v1"
-
 func init() {
-	startTime = time.Now()
+	handlers.StartTime = time.Now()
+	handlers.RegisteredWebhooks = 0
 }
 
 /*
@@ -34,11 +31,11 @@ func main() {
 // are called when the different urls are visited
 func handler() {
 	r := mux.NewRouter()
-	r.HandleFunc(version+"/country/{country_name}", handlers.CasesPerCountry).Queries("scope", "{begin_date-end_date}")
-	r.HandleFunc(version+"/country/{country_name}", handlers.CasesPerCountry)
-	r.HandleFunc(version+"/policy/{country_name}", handlers.CurrentStringencyLevel).Queries("scope", "{begin_date-end_date}")
-	r.HandleFunc(version+"/policy/{country_name}", handlers.CurrentStringencyLevel)
-	r.HandleFunc(version+"/diag/", handlers.Diag)
-	r.HandleFunc(version+"/diag", handlers.Diag)
+	r.HandleFunc(handlers.UrlBase+handlers.Version+"/country/{country_name}", handlers.CasesPerCountry).Queries("scope", "{begin_date-end_date}")
+	r.HandleFunc(handlers.UrlBase+handlers.Version+"/country/{country_name}", handlers.CasesPerCountry)
+	r.HandleFunc(handlers.UrlBase+handlers.Version+"/policy/{country_name}", handlers.CurrentStringencyLevel).Queries("scope", "{begin_date-end_date}")
+	r.HandleFunc(handlers.UrlBase+handlers.Version+"/policy/{country_name}", handlers.CurrentStringencyLevel)
+	r.HandleFunc(handlers.UrlBase+handlers.Version+"/diag/", handlers.Diag)
+	r.HandleFunc(handlers.UrlBase+handlers.Version+"/diag", handlers.Diag)
 	http.Handle("/", r)
 }
