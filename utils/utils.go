@@ -31,8 +31,8 @@ func GetBody(request string, w http.ResponseWriter) ([]byte, error) {
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		// Handles user input error
-		http.Error(w, "Error: Error in query", resp.StatusCode)
-		return nil, errors.New("Error in query")
+		http.Error(w, "Error: Status code not 2xx", resp.StatusCode)
+		return nil, errors.New("Status code not 2xx")
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)

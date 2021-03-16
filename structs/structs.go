@@ -12,6 +12,7 @@ type EntireCountryInformation struct {
 	Country    string
 	Continent  string
 	Population int
+	Dates      map[string]int
 }
 
 // ReturnConfirmedCases is used for returning a json response
