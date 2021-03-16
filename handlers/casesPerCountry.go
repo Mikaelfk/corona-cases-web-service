@@ -1,15 +1,14 @@
 package handlers
 
 import (
+	"assignment-2/structs"
+	"assignment-2/utils"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
-
-	"assignment-2/structs"
-	"assignment-2/utils"
 
 	"github.com/gorilla/mux"
 )
@@ -123,15 +122,5 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 	}
 	fmt.Fprintf(w, string(b))
-
-}
-
-// CurrentStringencyLevel shows the stringency level
-func CurrentStringencyLevel(w http.ResponseWriter, r *http.Request) {
-
-}
-
-// Diag shows a diagnostics interface
-func Diag(w http.ResponseWriter, r *http.Request) {
 
 }
