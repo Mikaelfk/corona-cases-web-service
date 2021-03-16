@@ -4,11 +4,9 @@ import (
 	"assignment-2/structs"
 	"assignment-2/utils"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -30,21 +28,10 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 	scope := "total"
 	populationPercentage := float32(0.0)
 	if ok {
-		splitdate := strings.Split(date, "-")
-		if len(splitdate) < 6 {
-			// Handles string error
-			err := errors.New("Error in date")
-			log.Printf("Error, %v", err)
+		beginDate, endDate, err := utils.SplitDate(date)
+		if err != nil {
+			log.Printf("Error: %v", err)
 			http.Error(w, "Error: "+err.Error(), http.StatusBadRequest)
-			return
-		}
-		// Splits the dates into two different strings
-		beginDate := splitdate[0] + "-" + splitdate[1] + "-" + splitdate[2]
-		endDate := splitdate[3] + "-" + splitdate[4] + "-" + splitdate[5]
-		// Check if the dates are valid
-		if !utils.ValidDate(beginDate) || !utils.ValidDate(endDate) {
-			log.Println("Error in date")
-			http.Error(w, "Error in date", http.StatusBadRequest)
 			return
 		}
 		bodyCases, err := utils.GetBody(covidCasesAPI+"/history?country="+countryName+"&status=Confirmed", w)

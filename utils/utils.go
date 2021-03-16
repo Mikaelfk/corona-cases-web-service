@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -53,4 +54,24 @@ func ValidDate(date string) bool {
 		return false
 	}
 	return true
+}
+
+func SplitDate(date string) (string, string, error) {
+	splitdate := strings.Split(date, "-")
+	if len(splitdate) < 6 {
+		// Handles string error
+		err := errors.New("Date is not valid")
+		log.Printf("Error, %v", err)
+		return "", "", err
+	}
+	// Splits the dates into two different strings
+	beginDate := splitdate[0] + "-" + splitdate[1] + "-" + splitdate[2]
+	endDate := splitdate[3] + "-" + splitdate[4] + "-" + splitdate[5]
+	// Check if the dates are valid
+	if !ValidDate(beginDate) || !ValidDate(endDate) {
+		err := errors.New("Date is not valid")
+		log.Println("Error in date")
+		return "", "", err
+	}
+	return beginDate, endDate, nil
 }
