@@ -33,6 +33,7 @@ type StringencyResponse struct {
 // StringencyData stores the stringency_actual value
 type StringencyData struct {
 	StringencyActual float32 `json:"stringency_actual"`
+	Msg              string  `json:"msg"`
 }
 
 // ReturnStringency is used for returning a JSON response for the policy endpoint
