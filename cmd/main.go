@@ -23,7 +23,7 @@ func init() {
 func main() {
 	port := utils.GetPort()
 	handler()
-	fmt.Printf("Listening on port :%s", port)
+	fmt.Printf("Listening on port :%s\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 

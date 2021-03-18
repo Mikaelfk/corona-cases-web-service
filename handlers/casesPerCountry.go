@@ -11,9 +11,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const covidCasesAPI = "https://covid-api.mmediagroup.fr/v1"
-const dataAPI = "https://covidtrackerapi.bsg.ox.ac.uk/api/v2"
-
 // CasesPerCountry gets amount of cases for a country
 func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -34,7 +31,7 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Error: "+err.Error(), http.StatusBadRequest)
 			return
 		}
-		bodyCases, err := utils.GetBody(covidCasesAPI+"/history?country="+countryName+"&status=Confirmed", w)
+		bodyCases, err := utils.GetBody(utils.CovidCasesAPI+"/history?country="+countryName+"&status=Confirmed", w)
 		if err != nil {
 			// Errors are reported to the user in the GetBody function, and logged here
 			log.Printf("Error: %v", err)
@@ -44,7 +41,7 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 		if err = json.Unmarshal([]byte(string(bodyCases)), &informationCases); err != nil {
 			// Handles json parsing error
 			log.Printf("Error: %v", err)
-			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Error: "+err.Error(), utils.InternalServerError)
 			return
 		}
 		// Check if the country requested exists
@@ -52,7 +49,7 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Country does not exists, remember to capitalize the first letter of the country name", http.StatusBadRequest)
 			return
 		}
-		bodyRecovered, err := utils.GetBody(covidCasesAPI+"/history?country="+countryName+"&status=Recovered", w)
+		bodyRecovered, err := utils.GetBody(utils.CovidCasesAPI+"/history?country="+countryName+"&status=Recovered", w)
 		if err != nil {
 			// Errors are reported to the user in the GetBody function, and logged here
 			log.Printf("Error: %v", err)
@@ -62,7 +59,7 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 		if err = json.Unmarshal([]byte(string(bodyRecovered)), &informationRecovered); err != nil {
 			// Handles json parsing error
 			log.Printf("Error: %v", err)
-			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Error: "+err.Error(), utils.InternalServerError)
 			return
 		}
 		casesSince = informationCases.All.Dates[endDate] - informationCases.All.Dates[beginDate]
@@ -73,7 +70,7 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 		// The expression is complicated to make sure there are only two decimals.
 		populationPercentage = float32(int((float32(casesSince)/float32(informationRecovered.All.Population)*100)*100)) / 10
 	} else {
-		body, err := utils.GetBody(covidCasesAPI+"/cases?country="+countryName, w)
+		body, err := utils.GetBody(utils.CovidCasesAPI+"/cases?country="+countryName, w)
 		if err != nil {
 			// Errors are reported to the user in the GetBody function, and logged here
 			log.Printf("Error: %v", err)
@@ -83,11 +80,11 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 		if err = json.Unmarshal([]byte(string(body)), &information); err != nil {
 			// Handles json parsing error
 			log.Printf("Error: %v", err)
-			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Error: "+err.Error(), utils.InternalServerError)
 			return
 		}
 		if information.All.Country == "" {
-			http.Error(w, "Country does not exists, remember to capitalize the first letter of the country name", http.StatusBadRequest)
+			http.Error(w, "Country does not exists, remember to capitalize the first letter of the country name", utils.BadRequest)
 			return
 		}
 		casesSince = information.All.Confirmed
@@ -106,8 +103,8 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 	b, err := json.Marshal(returnJSON)
 	if err != nil {
 		log.Printf("Error: %v", err)
-		http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Error: "+err.Error(), utils.InternalServerError)
 	}
-	fmt.Fprintf(w, string(b))
+	fmt.Fprint(w, string(b))
 
 }

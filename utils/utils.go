@@ -26,21 +26,16 @@ func GetBody(request string, w http.ResponseWriter) ([]byte, error) {
 
 	if err != nil {
 		// Handles retrieval errors
-		http.Error(w, "Error: "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "Error: "+err.Error(), BadRequest)
 		return nil, err
 	}
 
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		// Handles user input error
-		http.Error(w, "Error: Status code not 2xx", resp.StatusCode)
-		return nil, errors.New("Status code not 2xx")
-	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
 		// Handles body read error
-		http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Error: "+err.Error(), InternalServerError)
 		return nil, err
 	}
 	return body, nil
@@ -60,7 +55,7 @@ func SplitDate(date string) (string, string, error) {
 	splitdate := strings.Split(date, "-")
 	if len(splitdate) < 6 {
 		// Handles string error
-		err := errors.New("Date is not valid")
+		err := errors.New("date is not valid")
 		log.Printf("Error, %v", err)
 		return "", "", err
 	}
@@ -69,7 +64,7 @@ func SplitDate(date string) (string, string, error) {
 	endDate := splitdate[3] + "-" + splitdate[4] + "-" + splitdate[5]
 	// Check if the dates are valid
 	if !ValidDate(beginDate) || !ValidDate(endDate) {
-		err := errors.New("Date is not valid")
+		err := errors.New("date is not valid")
 		log.Println("Error in date")
 		return "", "", err
 	}

@@ -25,11 +25,35 @@ type ReturnConfirmedCases struct {
 	PopulationPercentage float32 `json:"population_percentage"`
 }
 
+// StringencyResponse stores the information from the response
+type StringencyResponse struct {
+	StringencyData StringencyData `json:"stringencyData"`
+}
+
+// StringencyData stores the stringency_actual value
+type StringencyData struct {
+	StringencyActual float32 `json:"stringency_actual"`
+}
+
+// ReturnStringency is used for returning a JSON response for the policy endpoint
+type ReturnStringency struct {
+	Country    string  `json:"country"`
+	Scope      string  `json:"scope"`
+	Stringency float32 `json:"stringency"`
+	Trend      float32 `json:"trend"`
+}
+
 // ReturnDiag is used for returning a JSON response for the diag endpoint
 type ReturnDiag struct {
 	MMediaGroupApi  string `json:"mmediagroupapi"`
 	CovidTrackerAPI string `json:"covidtrackerapi"`
+	CountryAPI      string `json:"countryapi"`
 	Registered      int    `json:"registered"`
 	Version         string `json:"version"`
 	Uptime          int    `json:"uptime"`
+}
+
+type CountryResponse struct {
+	Name       string `json:"name"`
+	Alpha3Code string `json:"alpha3Code"`
 }
