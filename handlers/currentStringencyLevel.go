@@ -93,7 +93,7 @@ func CurrentStringencyLevel(w http.ResponseWriter, r *http.Request) {
 			stringencyBeginDate = -1
 			trend = 0
 		}
-		fmt.Println(stringency)
+		stringency = stringencyEndDate
 	} else {
 		y, m, d := time.Now().AddDate(0, 0, -10).Date()
 		dateString := strconv.Itoa(y) + "-" + strconv.Itoa(int(m)) + "-" + strconv.Itoa(d)

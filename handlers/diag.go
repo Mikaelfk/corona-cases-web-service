@@ -17,7 +17,7 @@ var StartTime time.Time
 // RegisteredWebhooks is how many webooks are registered
 var RegisteredWebhooks int
 
-// UrlBase is the start of the url
+// URLBase is the start of the url
 const URLBase = "/corona/"
 
 // Version is the application version
