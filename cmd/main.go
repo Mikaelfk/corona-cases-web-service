@@ -31,11 +31,11 @@ func main() {
 // are called when the different urls are visited
 func handler() {
 	r := mux.NewRouter()
-	r.HandleFunc(handlers.UrlBase+handlers.Version+"/country/{country_name}", handlers.CasesPerCountry).Queries("scope", "{begin_date-end_date}")
-	r.HandleFunc(handlers.UrlBase+handlers.Version+"/country/{country_name}", handlers.CasesPerCountry)
-	r.HandleFunc(handlers.UrlBase+handlers.Version+"/policy/{country_name}", handlers.CurrentStringencyLevel).Queries("scope", "{begin_date-end_date}")
-	r.HandleFunc(handlers.UrlBase+handlers.Version+"/policy/{country_name}", handlers.CurrentStringencyLevel)
-	r.HandleFunc(handlers.UrlBase+handlers.Version+"/diag/", handlers.Diag)
-	r.HandleFunc(handlers.UrlBase+handlers.Version+"/diag", handlers.Diag)
+	r.HandleFunc(handlers.URLBase+handlers.Version+"/country/{country_name}", handlers.CasesPerCountry).Queries("scope", "{begin_date-end_date}")
+	r.HandleFunc(handlers.URLBase+handlers.Version+"/country/{country_name}", handlers.CasesPerCountry)
+	r.HandleFunc(handlers.URLBase+handlers.Version+"/policy/{country_name}", handlers.CurrentStringencyLevel).Queries("scope", "{begin_date-end_date}")
+	r.HandleFunc(handlers.URLBase+handlers.Version+"/policy/{country_name}", handlers.CurrentStringencyLevel)
+	r.HandleFunc(handlers.URLBase+handlers.Version+"/diag/", handlers.Diag)
+	r.HandleFunc(handlers.URLBase+handlers.Version+"/diag", handlers.Diag)
 	http.Handle("/", r)
 }

@@ -11,11 +11,16 @@ import (
 	"time"
 )
 
+// StartTime is the time the application is started
 var StartTime time.Time
 
+// RegisteredWebhooks is how many webooks are registered
 var RegisteredWebhooks int
 
-const UrlBase = "/corona/"
+// UrlBase is the start of the url
+const URLBase = "/corona/"
+
+// Version is the application version
 const Version = "v1"
 
 // Diag shows a diagnostics interface

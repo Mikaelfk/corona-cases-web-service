@@ -20,7 +20,7 @@ func GetPort() string {
 	return port
 }
 
-// Returns the response body of a get request
+// GetBody returns the response body of a get request
 func GetBody(request string, w http.ResponseWriter) ([]byte, error) {
 	resp, err := http.Get(request)
 
@@ -51,6 +51,7 @@ func ValidDate(date string) bool {
 	return true
 }
 
+// SplitDate splits one string with two dates into two strings
 func SplitDate(date string) (string, string, error) {
 	splitdate := strings.Split(date, "-")
 	if len(splitdate) < 6 {
