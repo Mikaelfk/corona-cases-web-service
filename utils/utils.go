@@ -26,7 +26,7 @@ func GetBody(request string, w http.ResponseWriter) ([]byte, error) {
 
 	if err != nil {
 		// Handles retrieval errors
-		http.Error(w, "Error: "+err.Error(), BadRequest)
+		http.Error(w, "Error: "+err.Error(), http.StatusBadRequest)
 		return nil, err
 	}
 
@@ -35,7 +35,7 @@ func GetBody(request string, w http.ResponseWriter) ([]byte, error) {
 
 	if err != nil {
 		// Handles body read error
-		http.Error(w, "Error: "+err.Error(), InternalServerError)
+		http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 		return nil, err
 	}
 	return body, nil
@@ -57,7 +57,6 @@ func SplitDate(date string) (string, string, error) {
 	if len(splitdate) < 6 {
 		// Handles string error
 		err := errors.New("date is not valid")
-		log.Printf("Error, %v", err)
 		return "", "", err
 	}
 	// Splits the dates into two different strings
@@ -66,7 +65,6 @@ func SplitDate(date string) (string, string, error) {
 	// Check if the dates are valid
 	if !ValidDate(beginDate) || !ValidDate(endDate) {
 		err := errors.New("date is not valid")
-		log.Println("Error in date")
 		return "", "", err
 	}
 	return beginDate, endDate, nil

@@ -30,7 +30,7 @@ func CurrentStringencyLevel(w http.ResponseWriter, r *http.Request) {
 	if err = json.Unmarshal([]byte(string(body)), &countryInformation); err != nil {
 		// Handles json parsing error
 		log.Printf("Error: %v", err)
-		http.Error(w, "Error: "+err.Error(), utils.InternalServerError)
+		http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	countryCode := countryInformation[0].Alpha3Code
@@ -49,7 +49,7 @@ func CurrentStringencyLevel(w http.ResponseWriter, r *http.Request) {
 		t, err := time.Parse("2006-01-02", endDate)
 		if err != nil {
 			log.Printf("Error: %v", err)
-			http.Error(w, "Error: "+err.Error(), utils.InternalServerError)
+			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		y, m, d := t.AddDate(0, 0, -10).Date()
@@ -64,7 +64,7 @@ func CurrentStringencyLevel(w http.ResponseWriter, r *http.Request) {
 		if err = json.Unmarshal([]byte(string(body)), &informationEndDate); err != nil {
 			// Handles json parsing error
 			log.Printf("Error: %v", err)
-			http.Error(w, "Error: "+err.Error(), utils.InternalServerError)
+			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
@@ -79,7 +79,7 @@ func CurrentStringencyLevel(w http.ResponseWriter, r *http.Request) {
 		if err = json.Unmarshal([]byte(string(body)), &informationBeginDate); err != nil {
 			// Handles json parsing error
 			log.Printf("Error: %v", err)
-			http.Error(w, "Error: "+err.Error(), utils.InternalServerError)
+			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		stringencyEndDate := informationEndDate.StringencyData.StringencyActual
@@ -107,7 +107,7 @@ func CurrentStringencyLevel(w http.ResponseWriter, r *http.Request) {
 		if err = json.Unmarshal([]byte(string(body)), &information); err != nil {
 			// Handles json parsing error
 			log.Printf("Error: %v", err)
-			http.Error(w, "Error: "+err.Error(), utils.InternalServerError)
+			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		if information.StringencyData.Msg != "" {
@@ -124,7 +124,7 @@ func CurrentStringencyLevel(w http.ResponseWriter, r *http.Request) {
 	b, err := json.Marshal(returnStringency)
 	if err != nil {
 		log.Printf("Error: %v", err)
-		http.Error(w, "Error: "+err.Error(), utils.InternalServerError)
+		http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 	}
 	fmt.Fprint(w, string(b))
 }

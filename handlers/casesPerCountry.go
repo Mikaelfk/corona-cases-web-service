@@ -41,7 +41,7 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 		if err = json.Unmarshal([]byte(string(bodyCases)), &informationCases); err != nil {
 			// Handles json parsing error
 			log.Printf("Error: %v", err)
-			http.Error(w, "Error: "+err.Error(), utils.InternalServerError)
+			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		// Check if the country requested exists
@@ -59,7 +59,7 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 		if err = json.Unmarshal([]byte(string(bodyRecovered)), &informationRecovered); err != nil {
 			// Handles json parsing error
 			log.Printf("Error: %v", err)
-			http.Error(w, "Error: "+err.Error(), utils.InternalServerError)
+			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		casesSince = informationCases.All.Dates[endDate] - informationCases.All.Dates[beginDate]
@@ -80,11 +80,11 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 		if err = json.Unmarshal([]byte(string(body)), &information); err != nil {
 			// Handles json parsing error
 			log.Printf("Error: %v", err)
-			http.Error(w, "Error: "+err.Error(), utils.InternalServerError)
+			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		if information.All.Country == "" {
-			http.Error(w, "Country does not exists, remember to capitalize the first letter of the country name", utils.BadRequest)
+			http.Error(w, "Country does not exists, remember to capitalize the first letter of the country name", http.StatusBadRequest)
 			return
 		}
 		casesSince = information.All.Confirmed
@@ -103,7 +103,7 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 	b, err := json.Marshal(returnJSON)
 	if err != nil {
 		log.Printf("Error: %v", err)
-		http.Error(w, "Error: "+err.Error(), utils.InternalServerError)
+		http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 	}
 	fmt.Fprint(w, string(b))
 
