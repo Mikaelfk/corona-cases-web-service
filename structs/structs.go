@@ -58,3 +58,8 @@ type CountryResponse struct {
 	Name       string `json:"name"`
 	Alpha3Code string `json:"alpha3Code"`
 }
+
+type WebhookRegistration struct {
+	Url   string `json:"url"`
+	Event string `json:"event"`
+}
