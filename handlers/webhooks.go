@@ -20,13 +20,13 @@ var SignatureKey = "X-SIGNATURE"
 var Secret []byte
 
 // Webhook DB
-var webhooks []structs.WebhookRegistration
+var Webhooks map[int]structs.WebhookRegistration
 
 /*
 	Handles webhook registration (POST) and lookup (GET) requests.
 	Expects WebhookRegistration struct body in request.
 */
-func WebhookHandler(w http.ResponseWriter, r *http.Request) {
+func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		// Expects incoming body in terms of WebhookRegistration struct
@@ -35,16 +35,21 @@ func WebhookHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, "Something went wrong: "+err.Error(), http.StatusBadRequest)
 		}
-		webhooks = append(webhooks, webhook)
-		// Note: Approach does not guarantee persistence or permanence of resource id (for CRUD)
-		//fmt.Fprintln(w, len(webhooks)-1)
+		webhookID := len(Webhooks)
+		Webhooks[webhookID] = webhook
+		RegisteredWebhooks++
+
 		fmt.Println("Webhook " + webhook.Url + " has been registered.")
-		http.Error(w, strconv.Itoa(len(webhooks)-1), http.StatusCreated)
+		http.Error(w, strconv.Itoa(webhookID), http.StatusCreated)
 	case http.MethodGet:
 		// For now just return all webhooks, don't respond to specific resource requests
-		err := json.NewEncoder(w).Encode(webhooks)
+		err := json.NewEncoder(w).Encode(Webhooks)
 		if err != nil {
 			http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+		}
+	case http.MethodDelete:
+		{
+
 		}
 	default:
 		http.Error(w, "Invalid method "+r.Method, http.StatusBadRequest)
@@ -58,7 +63,7 @@ func ServiceHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		fmt.Println("Received POST request...")
-		for _, v := range webhooks {
+		for _, v := range Webhooks {
 			go CallUrl(v.Url, "Trigger event")
 		}
 	default:
