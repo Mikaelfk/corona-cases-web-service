@@ -32,7 +32,7 @@ func main() {
 // are called when the different urls are visited
 func handler() {
 	// for registration
-	webhookEndpoint := "/webhook"
+	webhookEndpoint := "/notifications/"
 	// for invocation
 	serviceEndpoint := "/service"
 
@@ -43,7 +43,7 @@ func handler() {
 	r.HandleFunc(handlers.URLBase+handlers.Version+"/policy/{country_name}", handlers.CurrentStringencyLevel)
 	r.HandleFunc(handlers.URLBase+handlers.Version+"/diag/", handlers.Diag)
 	r.HandleFunc(handlers.URLBase+handlers.Version+"/diag", handlers.Diag)
-	r.HandleFunc(webhookEndpoint, handlers.WebhookHandler)
+	r.HandleFunc(handlers.URLBase+handlers.Version+webhookEndpoint, handlers.WebhookHandler)
 	r.HandleFunc(serviceEndpoint, handlers.ServiceHandler)
 
 	http.Handle("/", r)

@@ -59,7 +59,7 @@ func ServiceHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		fmt.Println("Received POST request...")
 		for _, v := range webhooks {
-			go CallUrl(v.Url, "Trigger event: Call to service endpoint with method "+v.Event)
+			go CallUrl(v.Url, "Trigger event")
 		}
 	default:
 		http.Error(w, "Invalid method "+r.Method, http.StatusBadRequest)
