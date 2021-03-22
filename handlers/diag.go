@@ -11,11 +11,16 @@ import (
 	"time"
 )
 
+// StartTime is the time the application is started
 var StartTime time.Time
 
+// RegisteredWebhooks is how many webooks are registered
 var RegisteredWebhooks int
 
-const UrlBase = "/corona/"
+// URLBase is the start of the url
+const URLBase = "/corona/"
+
+// Version is the application version
 const Version = "v1"
 
 // Diag shows a diagnostics interface
@@ -69,7 +74,7 @@ func Diag(w http.ResponseWriter, r *http.Request) {
 	b, err := json.Marshal(returnJSON)
 	if err != nil {
 		log.Printf("Error: %v", err)
-		http.Error(w, "Error: "+err.Error(), utils.InternalServerError)
+		http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 	}
 	fmt.Fprint(w, string(b))
 }
