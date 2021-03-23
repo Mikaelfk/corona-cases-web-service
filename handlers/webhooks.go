@@ -12,11 +12,11 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os/exec"
 	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
+	uuid "github.com/satori/go.uuid"
 )
 
 // Initialize signature (via init())
@@ -31,6 +31,7 @@ var Webhooks []structs.WebhookRegistration
 // WebhookRegistrationHandler handles webhook registration (POST) and lookup (GET) requests.
 // Expects WebhookRegistration struct body in request.
 func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	switch r.Method {
 	case http.MethodPost:
 		// Expects incoming body in terms of WebhookRegistration struct
@@ -39,22 +40,19 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, "Something went wrong: "+err.Error(), http.StatusBadRequest)
 		}
-		out, err := exec.Command("uuidgen").Output()
+		out := uuid.NewV4()
 		if err != nil {
 			log.Printf("Error: %v", err)
 			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 		}
-		idString := string(out)
+		idString := out.String()
 		idString = strings.TrimSuffix(idString, "\n")
 		webhook.ID = idString
 		Webhooks = append(Webhooks, webhook)
 
-		RegisteredWebhooks++
-
 		fmt.Println("Webhook " + webhook.Url + " has been registered.")
 		http.Error(w, webhook.ID, http.StatusCreated)
 	case http.MethodGet:
-		w.Header().Set("Content-Type", "application/json")
 		// For now just return all webhooks, don't respond to specific resource requests
 		err := json.NewEncoder(w).Encode(Webhooks)
 		if err != nil {

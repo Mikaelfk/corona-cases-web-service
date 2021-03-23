@@ -14,9 +14,6 @@ import (
 // StartTime is the time the application is started
 var StartTime time.Time
 
-// RegisteredWebhooks is how many webooks are registered
-var RegisteredWebhooks int
-
 // URLBase is the start of the url
 const URLBase = "/corona/"
 
@@ -68,7 +65,7 @@ func Diag(w http.ResponseWriter, r *http.Request) {
 	returnJSON.MMediaGroupApi = strconv.Itoa(mMediaGroupStatusCode)
 	returnJSON.CovidTrackerAPI = strconv.Itoa(covidTrackerStatusCode)
 	returnJSON.CountryAPI = strconv.Itoa(countriesStatusCode)
-	returnJSON.Registered = RegisteredWebhooks
+	returnJSON.Registered = len(Webhooks)
 	returnJSON.Version = "v1"
 	returnJSON.Uptime = int(time.Since(StartTime) / time.Second)
 	b, err := json.Marshal(returnJSON)

@@ -14,7 +14,6 @@ import (
 
 func init() {
 	handlers.StartTime = time.Now()
-	handlers.RegisteredWebhooks = 0
 	handlers.Secret = []byte{50, 32, 11, 78, 2}
 }
 
