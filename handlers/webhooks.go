@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"assignment-2/structs"
+	"assignment-2/utils"
 	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
@@ -9,8 +10,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"os/exec"
 	"strconv"
+	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 // Initialize signature (via init())
@@ -20,12 +26,10 @@ var SignatureKey = "X-SIGNATURE"
 var Secret []byte
 
 // Webhook DB
-var Webhooks map[int]structs.WebhookRegistration
+var Webhooks []structs.WebhookRegistration
 
-/*
-	Handles webhook registration (POST) and lookup (GET) requests.
-	Expects WebhookRegistration struct body in request.
-*/
+// WebhookRegistrationHandler handles webhook registration (POST) and lookup (GET) requests.
+// Expects WebhookRegistration struct body in request.
 func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
@@ -35,13 +39,22 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, "Something went wrong: "+err.Error(), http.StatusBadRequest)
 		}
-		webhookID := len(Webhooks)
-		Webhooks[webhookID] = webhook
+		out, err := exec.Command("uuidgen").Output()
+		if err != nil {
+			log.Printf("Error: %v", err)
+			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
+		}
+		idString := string(out)
+		idString = strings.TrimSuffix(idString, "\n")
+		webhook.ID = idString
+		Webhooks = append(Webhooks, webhook)
+
 		RegisteredWebhooks++
 
 		fmt.Println("Webhook " + webhook.Url + " has been registered.")
-		http.Error(w, strconv.Itoa(webhookID), http.StatusCreated)
+		http.Error(w, webhook.ID, http.StatusCreated)
 	case http.MethodGet:
+		w.Header().Set("Content-Type", "application/json")
 		// For now just return all webhooks, don't respond to specific resource requests
 		err := json.NewEncoder(w).Encode(Webhooks)
 		if err != nil {
@@ -52,9 +65,36 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/*
-	Invokes the web service to trigger event. Currently only responds to POST requests.
-*/
+// WebhookIDHandler handles webhook lookup (GET) and deletion (DELETE) requests by ID
+func WebhookIDHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	switch r.Method {
+	case http.MethodGet:
+		w.Header().Set("Content-Type", "application/json")
+		for _, v := range Webhooks {
+			if v.ID == id {
+				err := json.NewEncoder(w).Encode(v)
+				if err != nil {
+					http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+				}
+			}
+		}
+	case http.MethodDelete:
+		w.Header().Set("Content-Type", "application/json")
+		i := 0
+		for _, v := range Webhooks {
+			if v.ID == id {
+				utils.Remove(Webhooks, i)
+			}
+			i++
+		}
+	default:
+		http.Error(w, "Invalid method "+r.Method, http.StatusBadRequest)
+	}
+}
+
+// Invokes the web service to trigger event. Currently only responds to POST requests.
 func ServiceHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:

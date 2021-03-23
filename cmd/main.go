@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"assignment-2/handlers"
-	"assignment-2/structs"
 	"assignment-2/utils"
 
 	"github.com/gorilla/mux"
@@ -17,7 +16,6 @@ func init() {
 	handlers.StartTime = time.Now()
 	handlers.RegisteredWebhooks = 0
 	handlers.Secret = []byte{50, 32, 11, 78, 2}
-	handlers.Webhooks = make(map[int]structs.WebhookRegistration)
 }
 
 /*
@@ -46,6 +44,7 @@ func handler() {
 	r.HandleFunc(handlers.URLBase+handlers.Version+"/diag/", handlers.Diag)
 	r.HandleFunc(handlers.URLBase+handlers.Version+"/diag", handlers.Diag)
 	r.HandleFunc(handlers.URLBase+handlers.Version+webhookEndpoint, handlers.WebhookRegistrationHandler)
+	r.HandleFunc(handlers.URLBase+handlers.Version+webhookEndpoint+"{id}", handlers.WebhookIDHandler)
 	r.HandleFunc(serviceEndpoint, handlers.ServiceHandler)
 
 	http.Handle("/", r)

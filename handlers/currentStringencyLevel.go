@@ -47,14 +47,6 @@ func CurrentStringencyLevel(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		scope = beginDate + "-" + endDate
-		t, err := time.Parse("2006-01-02", endDate)
-		if err != nil {
-			log.Printf("Error: %v", err)
-			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		y, m, d := t.AddDate(0, 0, -10).Date()
-		endDate = strconv.Itoa(y) + "-" + strconv.Itoa(int(m)) + "-" + strconv.Itoa(d)
 		body, err := utils.GetBody(utils.DataAPI+"/stringency/actions/"+countryCode+"/"+endDate, w)
 		if err != nil {
 			// Errors are reported to the user in the GetBody function, and logged here
