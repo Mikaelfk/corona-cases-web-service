@@ -47,10 +47,6 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
 		}
-	case http.MethodDelete:
-		{
-
-		}
 	default:
 		http.Error(w, "Invalid method "+r.Method, http.StatusBadRequest)
 	}

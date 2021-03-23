@@ -46,6 +46,7 @@ func CurrentStringencyLevel(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Error: "+err.Error(), http.StatusBadRequest)
 			return
 		}
+		scope = beginDate + "-" + endDate
 		t, err := time.Parse("2006-01-02", endDate)
 		if err != nil {
 			log.Printf("Error: %v", err)
