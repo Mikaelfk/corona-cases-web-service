@@ -13,7 +13,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
@@ -46,7 +45,6 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 		}
 		idString := out.String()
-		idString = strings.TrimSuffix(idString, "\n")
 		webhook.ID = idString
 		Webhooks = append(Webhooks, webhook)
 
@@ -67,9 +65,10 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 func WebhookIDHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
+	fmt.Println(id)
+	w.Header().Set("Content-Type", "application/json")
 	switch r.Method {
 	case http.MethodGet:
-		w.Header().Set("Content-Type", "application/json")
 		for _, v := range Webhooks {
 			if v.ID == id {
 				err := json.NewEncoder(w).Encode(v)
@@ -79,11 +78,12 @@ func WebhookIDHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	case http.MethodDelete:
-		w.Header().Set("Content-Type", "application/json")
 		i := 0
 		for _, v := range Webhooks {
 			if v.ID == id {
-				utils.Remove(Webhooks, i)
+				fmt.Printf("Deleted Webhook with ID: %s", v.ID)
+				Webhooks = utils.Remove(Webhooks, i)
+				i--
 			}
 			i++
 		}
