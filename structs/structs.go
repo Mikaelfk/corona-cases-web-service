@@ -33,6 +33,7 @@ type StringencyResponse struct {
 // StringencyData stores the stringency_actual value
 type StringencyData struct {
 	StringencyActual float32 `json:"stringency_actual"`
+	Stringency       float32 `json:"stringency"`
 	Msg              string  `json:"msg"`
 }
 
