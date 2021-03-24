@@ -77,22 +77,21 @@ func CurrentStringencyLevel(w http.ResponseWriter, r *http.Request) {
 		}
 		stringencyEndDate := informationEndDate.StringencyData.StringencyActual
 		stringencyBeginDate := informationBeginDate.StringencyData.StringencyActual
-		trend = stringencyEndDate - stringencyBeginDate
 		if stringencyEndDate == 0 {
 			stringencyEndDate = informationEndDate.StringencyData.Stringency
-			trend = stringencyEndDate - stringencyBeginDate
 			if informationEndDate.StringencyData.Msg != "" {
 				stringencyEndDate = -1
-				trend = 0
 			}
 		}
 		if stringencyBeginDate == 0 {
 			stringencyBeginDate = informationBeginDate.StringencyData.Stringency
-			trend = stringencyEndDate - stringencyBeginDate
 			if informationBeginDate.StringencyData.Msg != "" {
 				stringencyEndDate = -1
-				trend = 0
 			}
+		}
+		trend = stringencyEndDate - stringencyBeginDate
+		if stringencyBeginDate == 0 || stringencyEndDate == 0 {
+			trend = 0
 		}
 		stringency = stringencyEndDate
 	} else {
