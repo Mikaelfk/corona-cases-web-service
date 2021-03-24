@@ -46,5 +46,7 @@ func handler() {
 	r.HandleFunc(handlers.URLBase+handlers.Version+webhookEndpoint+"{id}", handlers.WebhookIDHandler)
 	r.HandleFunc(serviceEndpoint, handlers.ServiceHandler)
 
+	http.HandleFunc("/invoked/", handlers.ContentValidatingHandler)
+
 	http.Handle("/", r)
 }

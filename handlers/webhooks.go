@@ -18,8 +18,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-// Initialize signature (via init())
 var SignatureKey = "X-SIGNATURE"
+var ClientSignatureKey = "X-SIGNATURE"
 
 //var Mac hash.Hash
 var Secret []byte
@@ -51,7 +51,7 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Webhook " + webhook.Url + " has been registered.")
 		http.Error(w, webhook.ID, http.StatusCreated)
 	case http.MethodGet:
-		// For now just return all webhooks, don't respond to specific resource requests
+		// Returns all webhooks in JSON format
 		err := json.NewEncoder(w).Encode(Webhooks)
 		if err != nil {
 			http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
@@ -135,4 +135,48 @@ func CallUrl(url string, content string) {
 
 	fmt.Println("Webhook invoked. Received status code " + strconv.Itoa(res.StatusCode) +
 		" and body: " + string(response))
+}
+
+func ContentValidatingHandler(w http.ResponseWriter, r *http.Request) {
+
+	// Simply print body
+	content, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println("Error when reading body: " + err.Error())
+		http.Error(w, "Error when reading body: "+err.Error(), http.StatusBadRequest)
+	}
+
+	fmt.Println("Received invocation with method " + r.Method + " and body: " + string(content))
+
+	// Extract signature from header based on known key
+	signature := r.Header.Get(ClientSignatureKey)
+
+	// Convert string to []byte
+	signatureByte, err := hex.DecodeString(signature)
+	if err != nil {
+		http.Error(w, "Error during Signature decoding: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println("Signature: " + signature)
+	// Hash content of body
+	mac := hmac.New(sha256.New, Secret)
+	_, err = mac.Write(content)
+	if err != nil {
+		http.Error(w, "Error during message decoding: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fmt.Println("Content: " + hex.EncodeToString(mac.Sum(nil)))
+
+	// Compare HMAC with received request
+	if hmac.Equal(signatureByte, mac.Sum(nil)) {
+		fmt.Println("Valid invocation (with validated content) on " + r.URL.Path)
+		_, err = fmt.Fprint(w, "Successfully invoked dummy web service.")
+		if err != nil {
+			fmt.Println("Something went wrong when sending response: " + err.Error())
+		}
+	} else { // Error - invalid HMAC
+		fmt.Println("Invalid invocation (tampered content?) on " + r.URL.Path)
+		http.Error(w, "Invalid invocation", http.StatusBadRequest)
+	}
 }

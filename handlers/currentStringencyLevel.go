@@ -114,6 +114,9 @@ func CurrentStringencyLevel(w http.ResponseWriter, r *http.Request) {
 			stringency = -1
 		} else {
 			stringency = information.StringencyData.StringencyActual
+			if stringency == 0 {
+				stringency = information.StringencyData.Stringency
+			}
 		}
 	}
 	var returnStringency structs.ReturnStringency
