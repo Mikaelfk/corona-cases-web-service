@@ -54,7 +54,7 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		// Returns all webhooks in JSON format
 		err := json.NewEncoder(w).Encode(Webhooks)
 		if err != nil {
-			http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, "Something went wrong when parsing to JSON: "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 	default:
@@ -120,7 +120,6 @@ func ServiceHandler(w http.ResponseWriter, r *http.Request) {
 
 func CallUrl(url string, content string) {
 	fmt.Println("Attempting invocation of url " + url + " ...")
-	//res, err := http.Post(url, "text/plain", bytes.NewReader([]byte(content)))
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader([]byte(content)))
 	if err != nil {
 		fmt.Errorf("%v", "Error during request creation.")
@@ -184,8 +183,4 @@ func CallWebhook(webhook structs.WebhookRegistration) {
 		casesResponse := string(body)
 		go CallUrl(webhook.Url, casesResponse)
 	}
-}
-
-func checkIfTimeoutReached() {
-
 }

@@ -16,7 +16,7 @@ import (
 // CurrentStringencyLevel shows the stringency level
 func CurrentStringencyLevel(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Println("Reached country endpoint")
+	fmt.Println("Reached policy stringency endpoint")
 	vars := mux.Vars(r)
 	countryName := vars["country_name"]
 	date, ok := vars["begin_date-end_date"]
