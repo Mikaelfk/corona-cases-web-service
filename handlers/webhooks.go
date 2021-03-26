@@ -13,13 +13,13 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 )
 
 var SignatureKey = "X-SIGNATURE"
-var ClientSignatureKey = "X-SIGNATURE"
 
 //var Mac hash.Hash
 var Secret []byte
@@ -98,7 +98,7 @@ func ServiceHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		fmt.Println("Received POST request...")
 		for _, v := range Webhooks {
-			go CallUrl(v.Url, "Trigger event")
+			go CallWebhook(v)
 		}
 	default:
 		http.Error(w, "Invalid method "+r.Method, http.StatusBadRequest)
@@ -137,46 +137,36 @@ func CallUrl(url string, content string) {
 		" and body: " + string(response))
 }
 
-func ContentValidatingHandler(w http.ResponseWriter, r *http.Request) {
-
-	// Simply print body
-	content, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		fmt.Println("Error when reading body: " + err.Error())
-		http.Error(w, "Error when reading body: "+err.Error(), http.StatusBadRequest)
-	}
-
-	fmt.Println("Received invocation with method " + r.Method + " and body: " + string(content))
-
-	// Extract signature from header based on known key
-	signature := r.Header.Get(ClientSignatureKey)
-
-	// Convert string to []byte
-	signatureByte, err := hex.DecodeString(signature)
-	if err != nil {
-		http.Error(w, "Error during Signature decoding: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	fmt.Println("Signature: " + signature)
-	// Hash content of body
-	mac := hmac.New(sha256.New, Secret)
-	_, err = mac.Write(content)
-	if err != nil {
-		http.Error(w, "Error during message decoding: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	fmt.Println("Content: " + hex.EncodeToString(mac.Sum(nil)))
-
-	// Compare HMAC with received request
-	if hmac.Equal(signatureByte, mac.Sum(nil)) {
-		fmt.Println("Valid invocation (with validated content) on " + r.URL.Path)
-		_, err = fmt.Fprint(w, "Successfully invoked dummy web service.")
+func CallWebhook(webhook structs.WebhookRegistration) {
+	if strings.ToLower(webhook.Field) == "stringency" {
+		resp, err := http.Get("http://localhost:8080/corona/v1/policy/" + webhook.Country)
 		if err != nil {
-			fmt.Println("Something went wrong when sending response: " + err.Error())
+			log.Println("Error when making get request")
+			go CallUrl(webhook.Url, "Error in request")
+			return
 		}
-	} else { // Error - invalid HMAC
-		fmt.Println("Invalid invocation (tampered content?) on " + r.URL.Path)
-		http.Error(w, "Invalid invocation", http.StatusBadRequest)
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("Error when reading body")
+			go CallUrl(webhook.Url, "Error when reading body")
+			return
+		}
+		policyResponse := string(body)
+		go CallUrl(webhook.Url, policyResponse)
+	} else if strings.ToLower(webhook.Field) == "confirmed" {
+		resp, err := http.Get("http://localhost:8080/corona/v1/country/" + webhook.Country)
+		if err != nil {
+			log.Println("Error when making get request")
+			go CallUrl(webhook.Url, "Error in request")
+			return
+		}
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("Error when reading body")
+			go CallUrl(webhook.Url, "Error when reading body")
+			return
+		}
+		casesResponse := string(body)
+		go CallUrl(webhook.Url, casesResponse)
 	}
 }

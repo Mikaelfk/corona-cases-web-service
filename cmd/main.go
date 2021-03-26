@@ -14,7 +14,7 @@ import (
 
 func init() {
 	handlers.StartTime = time.Now()
-	handlers.Secret = []byte{50, 32, 11, 78, 2}
+	handlers.Secret = []byte{1, 2, 3, 4, 5}
 }
 
 /*
@@ -45,8 +45,6 @@ func handler() {
 	r.HandleFunc(handlers.URLBase+handlers.Version+webhookEndpoint, handlers.WebhookRegistrationHandler)
 	r.HandleFunc(handlers.URLBase+handlers.Version+webhookEndpoint+"{id}", handlers.WebhookIDHandler)
 	r.HandleFunc(serviceEndpoint, handlers.ServiceHandler)
-
-	http.HandleFunc("/invoked/", handlers.ContentValidatingHandler)
 
 	http.Handle("/", r)
 }
