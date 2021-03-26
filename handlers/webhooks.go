@@ -37,11 +37,13 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&webhook)
 		if err != nil {
 			http.Error(w, "Something went wrong: "+err.Error(), http.StatusBadRequest)
+			return
 		}
 		out := uuid.NewV4()
 		if err != nil {
 			log.Printf("Error: %v", err)
 			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
+			return
 		}
 		idString := out.String()
 		Webhooks[idString] = webhook
@@ -53,6 +55,7 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		err := json.NewEncoder(w).Encode(Webhooks)
 		if err != nil {
 			http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+			return
 		}
 	default:
 		http.Error(w, "Invalid method "+r.Method, http.StatusBadRequest)
@@ -79,9 +82,11 @@ func WebhookIDHandler(w http.ResponseWriter, r *http.Request) {
 			err := json.NewEncoder(w).Encode(webhook)
 			if err != nil {
 				http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
+				return
 			}
 		} else {
 			http.Error(w, "No webhook with this ID", http.StatusBadRequest)
+			return
 		}
 	case http.MethodDelete:
 		_, ok := Webhooks[id]
@@ -91,9 +96,11 @@ func WebhookIDHandler(w http.ResponseWriter, r *http.Request) {
 			delete(Webhooks, id)
 		} else {
 			http.Error(w, "No webhook with this ID", http.StatusBadRequest)
+			return
 		}
 	default:
 		http.Error(w, "Invalid method "+r.Method, http.StatusBadRequest)
+		return
 	}
 }
 
@@ -107,6 +114,7 @@ func ServiceHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	default:
 		http.Error(w, "Invalid method "+r.Method, http.StatusBadRequest)
+		return
 	}
 }
 
