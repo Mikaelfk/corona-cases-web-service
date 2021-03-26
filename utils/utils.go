@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"assignment-2/structs"
 	"errors"
 	"io/ioutil"
 	"log"
@@ -69,8 +68,4 @@ func SplitDate(date string) (string, string, error) {
 		return "", "", err
 	}
 	return beginDate, endDate, nil
-}
-
-func Remove(slice []structs.WebhookRegistration, s int) []structs.WebhookRegistration {
-	return append(slice[:s], slice[s+1:]...)
 }

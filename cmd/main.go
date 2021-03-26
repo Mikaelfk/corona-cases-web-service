@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"assignment-2/handlers"
+	"assignment-2/structs"
 	"assignment-2/utils"
 
 	"github.com/gorilla/mux"
@@ -15,6 +16,7 @@ import (
 func init() {
 	handlers.StartTime = time.Now()
 	handlers.Secret = []byte{1, 2, 3, 4, 5}
+	handlers.Webhooks = make(map[string]structs.WebhookRegistration)
 }
 
 /*

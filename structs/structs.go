@@ -61,6 +61,14 @@ type CountryResponse struct {
 }
 
 type WebhookRegistration struct {
+	Url     string `json:"url"`
+	Timeout int    `json:"timeout"`
+	Field   string `json:"field"`
+	Country string `json:"country"`
+	Trigger string `json:"trigger"`
+}
+
+type WebhookResponse struct {
 	ID      string
 	Url     string `json:"url"`
 	Timeout int    `json:"timeout"`

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"assignment-2/structs"
-	"assignment-2/utils"
 	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
@@ -25,7 +24,7 @@ var SignatureKey = "X-SIGNATURE"
 var Secret []byte
 
 // Webhook DB
-var Webhooks []structs.WebhookRegistration
+var Webhooks map[string]structs.WebhookRegistration
 
 // WebhookRegistrationHandler handles webhook registration (POST) and lookup (GET) requests.
 // Expects WebhookRegistration struct body in request.
@@ -45,11 +44,10 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 		}
 		idString := out.String()
-		webhook.ID = idString
-		Webhooks = append(Webhooks, webhook)
+		Webhooks[idString] = webhook
 
 		fmt.Println("Webhook " + webhook.Url + " has been registered.")
-		http.Error(w, webhook.ID, http.StatusCreated)
+		http.Error(w, idString, http.StatusCreated)
 	case http.MethodGet:
 		// Returns all webhooks in JSON format
 		err := json.NewEncoder(w).Encode(Webhooks)
@@ -69,23 +67,30 @@ func WebhookIDHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	switch r.Method {
 	case http.MethodGet:
-		for _, v := range Webhooks {
-			if v.ID == id {
-				err := json.NewEncoder(w).Encode(v)
-				if err != nil {
-					http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
-				}
+		val, ok := Webhooks[id]
+		if ok {
+			webhook := structs.WebhookResponse{}
+			webhook.Country = val.Country
+			webhook.Field = val.Field
+			webhook.ID = id
+			webhook.Timeout = val.Timeout
+			webhook.Trigger = val.Trigger
+			webhook.Url = val.Url
+			err := json.NewEncoder(w).Encode(webhook)
+			if err != nil {
+				http.Error(w, "Something went wrong: "+err.Error(), http.StatusInternalServerError)
 			}
+		} else {
+			http.Error(w, "No webhook with this ID", http.StatusBadRequest)
 		}
 	case http.MethodDelete:
-		i := 0
-		for _, v := range Webhooks {
-			if v.ID == id {
-				fmt.Printf("Deleted Webhook with ID: %s", v.ID)
-				Webhooks = utils.Remove(Webhooks, i)
-				i--
-			}
-			i++
+		_, ok := Webhooks[id]
+		if ok {
+			fmt.Printf("Deleted webhook with ID: %s", id)
+			fmt.Fprintf(w, "Deleted webhook with ID: %s", id)
+			delete(Webhooks, id)
+		} else {
+			http.Error(w, "No webhook with this ID", http.StatusBadRequest)
 		}
 	default:
 		http.Error(w, "Invalid method "+r.Method, http.StatusBadRequest)
@@ -145,6 +150,7 @@ func CallWebhook(webhook structs.WebhookRegistration) {
 			go CallUrl(webhook.Url, "Error in request")
 			return
 		}
+		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Println("Error when reading body")
@@ -161,6 +167,7 @@ func CallWebhook(webhook structs.WebhookRegistration) {
 			return
 		}
 		body, err := ioutil.ReadAll(resp.Body)
+		defer resp.Body.Close()
 		if err != nil {
 			log.Println("Error when reading body")
 			go CallUrl(webhook.Url, "Error when reading body")
@@ -169,4 +176,8 @@ func CallWebhook(webhook structs.WebhookRegistration) {
 		casesResponse := string(body)
 		go CallUrl(webhook.Url, casesResponse)
 	}
+}
+
+func checkIfTimeoutReached() {
+
 }
