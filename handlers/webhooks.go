@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
@@ -25,6 +26,7 @@ var Secret []byte
 
 // Webhook DB
 var Webhooks map[string]structs.WebhookRegistration
+var WebhookPreviousInfo map[string]float32
 
 // WebhookRegistrationHandler handles webhook registration (POST) and lookup (GET) requests.
 // Expects WebhookRegistration struct body in request.
@@ -47,8 +49,8 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		idString := out.String()
 		Webhooks[idString] = webhook
-
 		fmt.Println("Webhook " + webhook.Url + " has been registered.")
+		go CallWebhookAfterSetTime(webhook.Timeout, Webhooks[idString])
 		http.Error(w, idString, http.StatusCreated)
 	case http.MethodGet:
 		// Returns all webhooks in JSON format
@@ -109,8 +111,9 @@ func ServiceHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		fmt.Println("Received POST request...")
-		for _, v := range Webhooks {
-			go CallWebhook(v)
+		for key, v := range Webhooks {
+			CallWebhook(&v)
+			Webhooks[key] = v
 		}
 	default:
 		http.Error(w, "Invalid method "+r.Method, http.StatusBadRequest)
@@ -149,7 +152,7 @@ func CallUrl(url string, content string) {
 		" and body: " + string(response))
 }
 
-func CallWebhook(webhook structs.WebhookRegistration) {
+func CallWebhook(webhook *structs.WebhookRegistration) {
 	if strings.ToLower(webhook.Field) == "stringency" {
 		resp, err := http.Get("http://localhost:8080/corona/v1/policy/" + webhook.Country)
 		if err != nil {
@@ -164,7 +167,14 @@ func CallWebhook(webhook structs.WebhookRegistration) {
 			go CallUrl(webhook.Url, "Error when reading body")
 			return
 		}
+		var informationStringency structs.ReturnStringency
+		if err = json.Unmarshal([]byte(string(body)), &informationStringency); err != nil {
+			// Handles json parsing error
+			log.Printf("Error: %v", err)
+			return
+		}
 		policyResponse := string(body)
+		WebhookPreviousInfo[webhook.ID] = informationStringency.Stringency
 		go CallUrl(webhook.Url, policyResponse)
 	} else if strings.ToLower(webhook.Field) == "confirmed" {
 		resp, err := http.Get("http://localhost:8080/corona/v1/country/" + webhook.Country)
@@ -181,6 +191,32 @@ func CallWebhook(webhook structs.WebhookRegistration) {
 			return
 		}
 		casesResponse := string(body)
+		webhook.PreviousResponse = casesResponse
 		go CallUrl(webhook.Url, casesResponse)
 	}
+}
+
+func CallWebhookAfterSetTime(timeout int, webhook structs.WebhookRegistration) {
+	ticker := time.NewTicker(time.Duration(timeout) * time.Second)
+	quit := make(chan bool)
+	go func() {
+		for {
+			select {
+			case <-quit:
+				return
+			case <-ticker.C:
+				fmt.Println(webhook)
+				go CallWebhook(&webhook)
+			}
+		}
+	}()
+	go func() {
+		for {
+			if (structs.WebhookRegistration{}) == webhook {
+				fmt.Println("Ticker stopped")
+				ticker.Stop()
+				quit <- true
+			}
+		}
+	}()
 }

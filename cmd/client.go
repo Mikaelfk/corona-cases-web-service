@@ -83,7 +83,7 @@ func main() {
 	PORT := "PORT"
 
 	if os.Getenv(PORT) != "" {
-		port = os.Getenv(PORT)
+		//port = os.Getenv(PORT)
 	}
 
 	endpoint := "/invoked/"
