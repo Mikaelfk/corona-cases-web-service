@@ -69,7 +69,7 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 		country = informationRecovered.All.Country
 		scope = beginDate + "-" + endDate
 		// The expression is complicated to make sure there are only two decimals.
-		populationPercentage = float32(int((float32(casesSince)/float32(informationRecovered.All.Population)*100)*100)) / 10
+		populationPercentage = float32(int((float32(casesSince)/float32(informationRecovered.All.Population)*100)*100)) / 100
 	} else {
 		body, err := utils.GetBody(utils.CovidCasesAPI+"/cases?country="+countryName, w)
 		if err != nil {
@@ -92,7 +92,7 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 		recoveredSince = information.All.Recovered
 		continent = information.All.Continent
 		country = information.All.Country
-		populationPercentage = float32(int((float32(casesSince)/float32(information.All.Population)*100)*100)) / 1
+		populationPercentage = float32(int((float32(casesSince)/float32(information.All.Population)*100)*100)) / 100
 	}
 	var returnJSON structs.ReturnConfirmedCases
 	returnJSON.Confirmed = casesSince
@@ -107,5 +107,4 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 	}
 	fmt.Fprint(w, string(b))
-
 }

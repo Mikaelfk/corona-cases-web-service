@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"assignment-2/structs"
+	"assignment-2/utils"
 	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
@@ -39,6 +40,11 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		err := json.NewDecoder(r.Body).Decode(&webhook)
 		if err != nil {
 			http.Error(w, "Something went wrong: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+		if !utils.ValidateWebhook(webhook, w) {
+			fmt.Println("Not a valid webhook body")
+			http.Error(w, "Not a valid webhook body", http.StatusBadRequest)
 			return
 		}
 		// Gets a random uuid, there is no checking if this id already exists.
@@ -101,6 +107,7 @@ func WebhookIDHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Printf("Deleted webhook with ID: %s", id)
 			fmt.Fprintf(w, "Deleted webhook with ID: %s", id)
 			delete(Webhooks, id)
+			delete(WebhookPreviousInfo, id)
 		} else {
 			http.Error(w, "No webhook with this ID", http.StatusBadRequest)
 			return
@@ -158,8 +165,11 @@ func CallUrl(url string, content string) {
 		" and body: " + string(response))
 }
 
+// CallWebhook makes a get request to the correct API endpoint and sends this to the client with
+// CallUrl
 func CallWebhook(webhook *structs.WebhookRegistration) {
 	if strings.ToLower(webhook.Field) == "stringency" {
+		// Makes a get request to the policy endpoint
 		resp, err := http.Get("http://localhost:8080/corona/v1/policy/" + webhook.Country)
 		if err != nil {
 			log.Println("Error when making get request")
@@ -192,8 +202,10 @@ func CallWebhook(webhook *structs.WebhookRegistration) {
 		} else {
 			go CallUrl(webhook.Url, policyResponse)
 		}
+		// Set the previous info of to the information recieved
 		WebhookPreviousInfo[webhook.ID] = informationStringency.Stringency
 	} else if strings.ToLower(webhook.Field) == "confirmed" {
+		// Makes a get request to the country endpoint
 		resp, err := http.Get("http://localhost:8080/corona/v1/country/" + webhook.Country)
 		if err != nil {
 			log.Println("Error when making get request")
@@ -225,8 +237,8 @@ func CallWebhook(webhook *structs.WebhookRegistration) {
 		} else {
 			go CallUrl(webhook.Url, casesResponse)
 		}
+		// Set the previous info of to the information recieved
 		WebhookPreviousInfo[webhook.ID] = float32(informationConfirmedCases.Confirmed)
-
 	}
 }
 

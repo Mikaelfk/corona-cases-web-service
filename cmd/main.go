@@ -39,14 +39,14 @@ func handler() {
 	serviceEndpoint := "/service"
 
 	r := mux.NewRouter()
-	r.HandleFunc(handlers.URLBase+handlers.Version+"/country/{country_name}", handlers.CasesPerCountry).Queries("scope", "{begin_date-end_date}")
-	r.HandleFunc(handlers.URLBase+handlers.Version+"/country/{country_name}", handlers.CasesPerCountry)
-	r.HandleFunc(handlers.URLBase+handlers.Version+"/policy/{country_name}", handlers.CurrentStringencyLevel).Queries("scope", "{begin_date-end_date}")
-	r.HandleFunc(handlers.URLBase+handlers.Version+"/policy/{country_name}", handlers.CurrentStringencyLevel)
-	r.HandleFunc(handlers.URLBase+handlers.Version+"/diag/", handlers.Diag)
-	r.HandleFunc(handlers.URLBase+handlers.Version+"/diag", handlers.Diag)
-	r.HandleFunc(handlers.URLBase+handlers.Version+webhookEndpoint, handlers.WebhookRegistrationHandler)
-	r.HandleFunc(handlers.URLBase+handlers.Version+webhookEndpoint+"{id}", handlers.WebhookIDHandler)
+	r.HandleFunc(utils.URLBase+utils.Version+"/country/{country_name}", handlers.CasesPerCountry).Queries("scope", "{begin_date-end_date}")
+	r.HandleFunc(utils.URLBase+utils.Version+"/country/{country_name}", handlers.CasesPerCountry)
+	r.HandleFunc(utils.URLBase+utils.Version+"/policy/{country_name}", handlers.CurrentStringencyLevel).Queries("scope", "{begin_date-end_date}")
+	r.HandleFunc(utils.URLBase+utils.Version+"/policy/{country_name}", handlers.CurrentStringencyLevel)
+	r.HandleFunc(utils.URLBase+utils.Version+"/diag/", handlers.Diag)
+	r.HandleFunc(utils.URLBase+utils.Version+"/diag", handlers.Diag)
+	r.HandleFunc(utils.URLBase+utils.Version+webhookEndpoint, handlers.WebhookRegistrationHandler)
+	r.HandleFunc(utils.URLBase+utils.Version+webhookEndpoint+"{id}", handlers.WebhookIDHandler)
 	r.HandleFunc(serviceEndpoint, handlers.ServiceHandler)
 
 	http.Handle("/", r)

@@ -14,12 +14,6 @@ import (
 // StartTime is the time the application is started
 var StartTime time.Time
 
-// URLBase is the start of the url
-const URLBase = "/corona/"
-
-// Version is the application version
-const Version = "v1"
-
 // Diag shows a diagnostics interface
 func Diag(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")

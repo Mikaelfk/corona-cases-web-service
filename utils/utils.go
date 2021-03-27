@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"assignment-2/structs"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,6 +28,11 @@ func GetBody(request string, w http.ResponseWriter) ([]byte, error) {
 
 	if err != nil {
 		// Handles retrieval errors
+		http.Error(w, "Error: "+err.Error(), http.StatusBadRequest)
+		return nil, err
+	}
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		err := errors.New("status code not 2xx")
 		http.Error(w, "Error: "+err.Error(), http.StatusBadRequest)
 		return nil, err
 	}
@@ -68,4 +75,30 @@ func SplitDate(date string) (string, string, error) {
 		return "", "", err
 	}
 	return beginDate, endDate, nil
+}
+
+func ValidCountry(countryName string, w http.ResponseWriter) bool {
+	_, err := GetBody(CountryAPI+"/name/"+countryName, w)
+	if err != nil {
+		log.Printf("Error: %v", err)
+		return false
+	}
+
+	return true
+}
+
+func ValidateWebhook(webhook structs.WebhookRegistration, w http.ResponseWriter) bool {
+	fmt.Println(webhook)
+	if webhook.Timeout <= 0 {
+		// Error
+		return false
+	} else if webhook.Field != "stringency" && webhook.Field != "confirmed" {
+		// Error
+		return false
+	} else if !ValidCountry(webhook.Country, w) {
+		// Error
+		fmt.Println("Not a valid country")
+		return false
+	}
+	return true
 }

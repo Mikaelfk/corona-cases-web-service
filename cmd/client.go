@@ -15,15 +15,11 @@ import (
 
 // Invoked Hash to be accepted
 var secret = []byte{143, 32, 33, 46, 59}
-var ClientSignatureKey = "X-SIGNATURE" // used for content-based validation
 
-/*
-	Dummy handler printing everything it receives to console and checks
-	whether content is correctly encoded (with signature).
-	Note: The hash is reinitialized for each interaction.
-	Suggestion: Retain hash instance and write each invocation to it -
-	ensures integrity for all interactions
-*/
+// used for content-based validation
+var ClientSignatureKey = "X-SIGNATURE"
+
+// ContentValidatingHandler validates the incoming content and if it succeeds prints the content to the console
 func ContentValidatingHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Simply print body
@@ -58,7 +54,7 @@ func ContentValidatingHandler(w http.ResponseWriter, r *http.Request) {
 	// Compare HMAC with received request
 	if hmac.Equal(signatureByte, mac.Sum(nil)) {
 		fmt.Println("Valid invocation (with validated content) on " + r.URL.Path)
-		_, err = fmt.Fprint(w, "Successfully invoked dummy web service.")
+		_, err = fmt.Fprint(w, "Successfully invoked web service.")
 		if err != nil {
 			fmt.Println("Something went wrong when sending response: " + err.Error())
 		}
