@@ -64,7 +64,18 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, idString, http.StatusCreated)
 	case http.MethodGet:
 		// Returns all webhooks in JSON format
-		err := json.NewEncoder(w).Encode(Webhooks)
+		var webhooksSlice []structs.ReturnWebhook
+		for _, v := range Webhooks {
+			webhook := structs.ReturnWebhook{}
+			webhook.ID = v.ID
+			webhook.Url = v.Url
+			webhook.Timeout = v.Timeout
+			webhook.Field = v.Field
+			webhook.Country = v.Country
+			webhook.Trigger = v.Trigger
+			webhooksSlice = append(webhooksSlice, webhook)
+		}
+		err := json.NewEncoder(w).Encode(webhooksSlice)
 		if err != nil {
 			http.Error(w, "Something went wrong when parsing to JSON: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -254,15 +265,12 @@ func CallWebhookAfterSetTime(timeout int, webhook structs.WebhookRegistration) {
 				return
 			case <-ticker.C:
 				webhook = Webhooks[webhook.ID]
+				if (structs.WebhookRegistration{}) == webhook {
+					ticker.Stop()
+					quit <- true
+					return
+				}
 				go CallWebhook(&webhook)
-			}
-		}
-	}()
-	go func() {
-		for {
-			if (structs.WebhookRegistration{}) == webhook {
-				ticker.Stop()
-				quit <- true
 			}
 		}
 	}()

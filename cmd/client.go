@@ -75,7 +75,7 @@ func main() {
 		//port = os.Getenv(PORT)
 	}
 
-	endpoint := "/invoked/"
+	endpoint := "/client/"
 
 	r := mux.NewRouter()
 	fmt.Println("Service listening on port " + port)
