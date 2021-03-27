@@ -55,11 +55,13 @@ type ReturnDiag struct {
 	Uptime          int    `json:"uptime"`
 }
 
+// CountryResponse is used for storing information from the country API
 type CountryResponse struct {
 	Name       string `json:"name"`
 	Alpha3Code string `json:"alpha3Code"`
 }
 
+// WebhookRegistration is used for storing the webhook data
 type WebhookRegistration struct {
 	ID               string `json:"-"`
 	Url              string `json:"url"`
@@ -70,8 +72,9 @@ type WebhookRegistration struct {
 	PreviousResponse string `json:"-"`
 }
 
-type WebhookResponse struct {
-	ID      string
+// ReturnWebhook is used for returning the webhook information to the user
+type ReturnWebhook struct {
+	ID      string `json:"id"`
 	Url     string `json:"url"`
 	Timeout int    `json:"timeout"`
 	Field   string `json:"field"`

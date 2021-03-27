@@ -41,6 +41,9 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Something went wrong: "+err.Error(), http.StatusBadRequest)
 			return
 		}
+		// Gets a random uuid, there is no checking if this id already exists.
+		// Considering there are so many different uuid's that could be generated
+		// the chance that a duplicate occurs is basically zero
 		out := uuid.NewV4()
 		if err != nil {
 			log.Printf("Error: %v", err)
@@ -48,6 +51,7 @@ func WebhookRegistrationHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		idString := out.String()
+		webhook.ID = idString
 		Webhooks[idString] = webhook
 		fmt.Println("Webhook " + webhook.Url + " has been registered.")
 		go CallWebhookAfterSetTime(webhook.Timeout, Webhooks[idString])
@@ -72,9 +76,10 @@ func WebhookIDHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	switch r.Method {
 	case http.MethodGet:
+		// Checks if the webhook exists
 		val, ok := Webhooks[id]
 		if ok {
-			webhook := structs.WebhookResponse{}
+			webhook := structs.ReturnWebhook{}
 			webhook.Country = val.Country
 			webhook.Field = val.Field
 			webhook.ID = id
@@ -121,6 +126,7 @@ func ServiceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// CallUrl is used to invoke the url in the webhook
 func CallUrl(url string, content string) {
 	fmt.Println("Attempting invocation of url " + url + " ...")
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader([]byte(content)))
@@ -173,9 +179,20 @@ func CallWebhook(webhook *structs.WebhookRegistration) {
 			log.Printf("Error: %v", err)
 			return
 		}
+
 		policyResponse := string(body)
+		// These if statements check if the trigger is ON_CHANGE, everything that is
+		// not ON_CHANGE is considered ON_TIMEOUT
+		if strings.ToLower(webhook.Trigger) == "on_change" {
+			if informationStringency.Stringency == WebhookPreviousInfo[webhook.ID] {
+				fmt.Println("Information is the same as previously")
+			} else {
+				go CallUrl(webhook.Url, policyResponse)
+			}
+		} else {
+			go CallUrl(webhook.Url, policyResponse)
+		}
 		WebhookPreviousInfo[webhook.ID] = informationStringency.Stringency
-		go CallUrl(webhook.Url, policyResponse)
 	} else if strings.ToLower(webhook.Field) == "confirmed" {
 		resp, err := http.Get("http://localhost:8080/corona/v1/country/" + webhook.Country)
 		if err != nil {
@@ -190,12 +207,31 @@ func CallWebhook(webhook *structs.WebhookRegistration) {
 			go CallUrl(webhook.Url, "Error when reading body")
 			return
 		}
+		var informationConfirmedCases structs.ReturnConfirmedCases
+		if err = json.Unmarshal([]byte(string(body)), &informationConfirmedCases); err != nil {
+			// Handles json parsing error
+			log.Printf("Error: %v", err)
+			return
+		}
 		casesResponse := string(body)
-		webhook.PreviousResponse = casesResponse
-		go CallUrl(webhook.Url, casesResponse)
+		// These if statements check if the trigger is ON_CHANGE, everything that is
+		// not ON_CHANGE is considered ON_TIMEOUT
+		if strings.ToLower(webhook.Trigger) == "on_change" {
+			if float32(informationConfirmedCases.Confirmed) == WebhookPreviousInfo[webhook.ID] {
+				fmt.Println("Information is the same as previously")
+			} else {
+				go CallUrl(webhook.Url, casesResponse)
+			}
+		} else {
+			go CallUrl(webhook.Url, casesResponse)
+		}
+		WebhookPreviousInfo[webhook.ID] = float32(informationConfirmedCases.Confirmed)
+
 	}
 }
 
+// CallWebhookAfterSetTime is sent a timeout in seconds and a webhook,
+// it calls the webhook when the timeout is reached.
 func CallWebhookAfterSetTime(timeout int, webhook structs.WebhookRegistration) {
 	ticker := time.NewTicker(time.Duration(timeout) * time.Second)
 	quit := make(chan bool)
@@ -205,7 +241,7 @@ func CallWebhookAfterSetTime(timeout int, webhook structs.WebhookRegistration) {
 			case <-quit:
 				return
 			case <-ticker.C:
-				fmt.Println(webhook)
+				webhook = Webhooks[webhook.ID]
 				go CallWebhook(&webhook)
 			}
 		}
@@ -213,7 +249,6 @@ func CallWebhookAfterSetTime(timeout int, webhook structs.WebhookRegistration) {
 	go func() {
 		for {
 			if (structs.WebhookRegistration{}) == webhook {
-				fmt.Println("Ticker stopped")
 				ticker.Stop()
 				quit <- true
 			}

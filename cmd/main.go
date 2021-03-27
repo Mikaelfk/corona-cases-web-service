@@ -15,8 +15,9 @@ import (
 
 func init() {
 	handlers.StartTime = time.Now()
-	handlers.Secret = []byte{1, 2, 3, 4, 5}
+	handlers.Secret = []byte{143, 32, 33, 46, 59}
 	handlers.Webhooks = make(map[string]structs.WebhookRegistration)
+	handlers.WebhookPreviousInfo = make(map[string]float32)
 }
 
 /*

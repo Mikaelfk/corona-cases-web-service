@@ -25,6 +25,7 @@ func CasesPerCountry(w http.ResponseWriter, r *http.Request) {
 	scope := "total"
 	populationPercentage := float32(0.0)
 	if ok {
+		// Splits the date variable into two date variables
 		beginDate, endDate, err := utils.SplitDate(date)
 		if err != nil {
 			log.Printf("Error: %v", err)

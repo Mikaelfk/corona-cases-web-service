@@ -13,15 +13,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-/*
-Switch to toggle on validation
-Validation level 0: no validation; everything accepted
-Validation level 1: check that URL is correct (signature)
-Validation level 2: check that content is correctly encoded (does not check URL)
-*/
-
 // Invoked Hash to be accepted
-var secret = []byte{1, 2, 3, 4, 5}     // not a good secret!
+var secret = []byte{143, 32, 33, 46, 59}
 var ClientSignatureKey = "X-SIGNATURE" // used for content-based validation
 
 /*
