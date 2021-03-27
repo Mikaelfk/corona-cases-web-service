@@ -88,7 +88,6 @@ func ValidCountry(countryName string, w http.ResponseWriter) bool {
 }
 
 func ValidateWebhook(webhook structs.WebhookRegistration, w http.ResponseWriter) bool {
-	fmt.Println(webhook)
 	if webhook.Timeout <= 0 {
 		// Error
 		return false
