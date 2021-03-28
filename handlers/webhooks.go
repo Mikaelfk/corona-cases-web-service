@@ -166,10 +166,12 @@ func CallUrl(url string, content string) {
 	res, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error in HTTP request: " + err.Error())
+		return
 	}
 	response, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println("Something is wrong with invocation response: " + err.Error())
+		return
 	}
 
 	fmt.Println("Webhook invoked. Received status code " + strconv.Itoa(res.StatusCode) +
