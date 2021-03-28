@@ -83,6 +83,8 @@ This body must contain:
    "trigger": "ON_CHANGE"
 }
 ```
+The url can be changed to a url generated from webhook.site
+### - Response
 
 The request will respond with the id of the webhook. This id can be used to see the details about the webhook or deletion of the webhook.
 The format of the id is uuid.
@@ -127,6 +129,12 @@ Method: POST
 Path: /service
 ```
 
+### Webhook client
+
+The url to the webhook client is:
+```http://localhost:8081/client/```
+
+
 ## Third Party Libraries Used
 
 Two third party libraries are used in this service:
@@ -141,3 +149,12 @@ To allow for compiling on Windows and MacOS I have chosen to use this library.
 https://github.com/gorilla/mux
 
 This router is used instead of the default go router mainly for simplicity.
+
+## Url to application
+
+The service is deployed at the ip:
+```10.212.141.29:8080```
+
+example GET request: ```10.212.141.29:8080/corona/v1/country/Norway```
+
+To access the application a vpn to the ntnu network is needed
